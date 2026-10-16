@@ -1,0 +1,71 @@
+WINDOWS SECURITY RELEASE -- NOT YET APPROVED FOR DISTRIBUTION
+
+Windows 1.0.6+15 was built and the existing portable App copy updated.
+The previous App is preserved in App-previous-1.0.5-before-session-revocation.
+An unsigned installer and full portable ZIP were produced. Android was untouched.
+POST /api/v1/auth/logout is now deployed after matching the SSH host fingerprint
+provided from the owner's server console. Source checksum was checked before
+the narrow patch; a timestamped server rollback copy was retained.
+Live checks: health 200, missing token 401, unknown token 200. No real customer
+session was targeted. Windows tests: 91 passed. Local backend tests: 27 passed.
+Defender custom scan of the setup EXE reported no threats.
+
+Implemented locally:
+- Legacy local password login fails closed; local SHA-256 credential creation
+  and authentication removed. Company sign-in uses server authentication.
+- Server-authenticated user refresh removes any old credential hash for that user.
+- Logout revokes only the current device token before deleting local credentials.
+  Network/server failure leaves the user signed in, retains data and restores
+  foreground updates. An internet connection is required for secure logout.
+- Server logout is idempotent for expired/revoked/unknown tokens and never trusts
+  a submitted company/user/session identifier.
+
+Remaining release gates:
+1. Completed: verified host identity and narrowly deployed logout with rollback.
+   Real-session production revocation testing remains unperformed.
+2. Verify live PIN throttling, TLS, reset-token expiry/reuse, role restrictions
+   and PostgreSQL tenant RLS using disposable test tenants, not customer data.
+3. Completed: built 1.0.6+15 and verified executable version.
+4. Completed: compiled tool/windows-installer.iss with publisher-signature-verified
+   Inno Setup 6.7.3. Installer is unsigned, per-user and non-administrative.
+   Confirm compiler licensing before public/commercial distribution.
+5. Clean Windows VM: install as a standard user, launch, log in/out, restart,
+   test offline sales then sync, receipt printing, account switching, upgrade
+   with unsynced records, uninstall/reinstall with records preserved. Test both
+   an existing portable installation and a fresh machine. Do not copy another
+   user's encrypted cache/secure-storage credentials into a distribution.
+6. Scan EXE, DLLs and installer with current antivirus. Inventory dependencies
+   and review advisories; automated functional tests are not a malware audit.
+7. Publish SHA-256 checksum and the full package over HTTPS. Do not instruct
+   users to disable Defender or SmartScreen. Unsigned warning is expected.
+8. Signing deferred by owner: obtain a trusted publisher certificate/service,
+   sign and timestamp application and installer, verify signatures on a clean
+   machine. Self-signing does not establish public publisher trust.
+
+OFF-SERVER BACKUP PROCEDURE (destination not yet chosen)
+- Select a separate provider/account/device; require encrypted transfer and
+  least-privilege credentials. Do not place storage keys inside the desktop app.
+- Take a consistent database backup and required uploaded assets. Encrypt before
+  upload using the existing server backup mechanism. Keep decryption keys and
+  MFA recovery material separately with controlled access.
+- Upload only encrypted output. Record SHA-256, timestamp, schema/application
+  version and completion result without logging secrets or customer records.
+- Enable retention/versioning or immutability when available. Agree retention
+  and recovery targets before scheduling automatic removal of any backup.
+- Restore into an isolated temporary environment with outbound mail disabled;
+  verify database integrity, company isolation, totals and attachments, then
+  securely remove only that explicitly identified temporary restore environment.
+- Alert on failed/missing backups and periodically perform a full restore drill.
+- An SSD connected to the same PC is not sufficient protection from loss,
+  ransomware or theft; maintain an independent encrypted copy.
+
+No clean-machine, comprehensive live-server security, disk-encryption or disaster-
+recovery certification is claimed. No customer records were modified by deployment
+or tests. Existing server encrypted-backup service reported success; off-server
+storage and restore verification remain outstanding.
+
+ARTIFACT SHA-256 CHECKSUMS
+Saleo-Windows-Setup-1.0.6.exe
+68F53E8058A323624E9790D2299C24B5708EE5D3FEFE06BA27456868C912BF26
+Saleo-Windows-1.0.6.zip
+0023F8EBD93AAC0614DEB6D71EA39963AA88CBEC11049653EC6C42ED07D8814C
